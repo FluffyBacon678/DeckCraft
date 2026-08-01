@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "deckcraft_hotbar",
+  "version": "${version}",
+  "name": "DeckCraft Hotbar",
+  "description": "Mirrors your Minecraft hotbar to an Elgato Stream Deck and lets you select hotbar slots from the deck. Client-side only; not required on the server.",
+  "authors": [
+    "FluffyBacon"
+  ],
+  "contact": {
+    "homepage": "https://github.com/FluffyBacon678/InputShowOff",
+    "sources": "https://github.com/FluffyBacon678/InputShowOff"
+  },
+  "license": "MIT",
+  "icon": "assets/deckcraft_hotbar/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.fluffybacon.deckcraft.hotbar.DeckCraftHotbarClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.17.0",
+    "minecraft": [
+      ">=1.21.11",
+      "<1.22"
+    ],
+    "java": ">=21",
+    "fabric-api": "*"
+  },
+  "suggests": {}
+}

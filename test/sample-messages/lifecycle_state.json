@@ -1,0 +1,7 @@
+{
+  "type": "lifecycle_state",
+  "protocolVersion": 1,
+  "state": "main_menu",
+  "inWorld": false,
+  "message": "Minecraft is open but no world is loaded"
+}

@@ -1,0 +1,32 @@
+# ---- OS ----
+.DS_Store
+Thumbs.db
+
+# ---- Node / Stream Deck plugin ----
+node_modules/
+*.log
+streamdeck-plugin/com.fluffybacon.deckcraft-hotbar.sdPlugin/bin/
+streamdeck-plugin/com.fluffybacon.deckcraft-hotbar.sdPlugin/logs/
+# Item textures are extracted from the user's own Minecraft install — never committed.
+streamdeck-plugin/com.fluffybacon.deckcraft-hotbar.sdPlugin/imgs/items/
+streamdeck-plugin/.preview-build/
+streamdeck-plugin/preview-keys.html
+
+# ---- Java / Gradle / Fabric ----
+.gradle/
+build/
+run/
+*.class
+minecraft-fabric/nettest/out/
+minecraft-fabric/nettest/bridge.log
+
+# ---- IDE ----
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+dist/
+
+# Derived banner PNG is redundant with the committed JPEG and is regenerable
+# from branding/source via make-branding.ps1.
+branding/modrinth-banner-1920.png

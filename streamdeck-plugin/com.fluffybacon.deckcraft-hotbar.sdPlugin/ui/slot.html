@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeckCraft Hotbar — Slot</title>
+    <!-- sdpi-components renders Elgato-styled inputs and handles settings round-tripping.
+         Requires internet on first load; values are still saved if offline. -->
+    <script src="https://sdpi-components.dev/releases/v4/sdpi-components.js"></script>
+  </head>
+  <body>
+    <sdpi-item label="Inventory slot">
+      <sdpi-select setting="slotIndex" default="0">
+        <optgroup label="Hotbar (pressable)">
+          <option value="0">Hotbar 1</option>
+          <option value="1">Hotbar 2</option>
+          <option value="2">Hotbar 3</option>
+          <option value="3">Hotbar 4</option>
+          <option value="4">Hotbar 5</option>
+          <option value="5">Hotbar 6</option>
+          <option value="6">Hotbar 7</option>
+          <option value="7">Hotbar 8</option>
+          <option value="8">Hotbar 9</option>
+        </optgroup>
+        <optgroup label="Storage row 1 (read-only)">
+          <option value="9">Storage 1</option>
+          <option value="10">Storage 2</option>
+          <option value="11">Storage 3</option>
+          <option value="12">Storage 4</option>
+          <option value="13">Storage 5</option>
+          <option value="14">Storage 6</option>
+          <option value="15">Storage 7</option>
+          <option value="16">Storage 8</option>
+          <option value="17">Storage 9</option>
+        </optgroup>
+        <optgroup label="Storage row 2 (read-only)">
+          <option value="18">Storage 10</option>
+          <option value="19">Storage 11</option>
+          <option value="20">Storage 12</option>
+          <option value="21">Storage 13</option>
+          <option value="22">Storage 14</option>
+          <option value="23">Storage 15</option>
+          <option value="24">Storage 16</option>
+          <option value="25">Storage 17</option>
+          <option value="26">Storage 18</option>
+        </optgroup>
+        <optgroup label="Storage row 3 (read-only)">
+          <option value="27">Storage 19</option>
+          <option value="28">Storage 20</option>
+          <option value="29">Storage 21</option>
+          <option value="30">Storage 22</option>
+          <option value="31">Storage 23</option>
+          <option value="32">Storage 24</option>
+          <option value="33">Storage 25</option>
+          <option value="34">Storage 26</option>
+          <option value="35">Storage 27</option>
+        </optgroup>
+        <optgroup label="Armor (read-only)">
+          <option value="36">Boots</option>
+          <option value="37">Leggings</option>
+          <option value="38">Chestplate</option>
+          <option value="39">Helmet</option>
+        </optgroup>
+        <optgroup label="Off-hand (read-only)">
+          <option value="40">Off-hand</option>
+        </optgroup>
+      </sdpi-select>
+    </sdpi-item>
+
+    <sdpi-item label="Display">
+      <sdpi-select setting="display" default="icon">
+        <option value="icon">Item icon + count</option>
+        <option value="image">Name tile</option>
+        <option value="title">Plain title text</option>
+      </sdpi-select>
+    </sdpi-item>
+
+    <sdpi-item label="Notes">
+      <sdpi-item-value>
+        Only hotbar keys are pressable — they select that slot, like pressing 1-9 in game.
+        Storage, armor and off-hand keys are a read-only mirror; this mod never moves items.
+        Item icons need a one-time <code>npm run icons:extract</code>; anything without a flat
+        texture (shields, modded items) shows its name instead.
+        If armor pieces look swapped, pick the neighbouring option.
+      </sdpi-item-value>
+    </sdpi-item>
+  </body>
+</html>

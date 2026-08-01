@@ -1,0 +1,6 @@
+{
+  "type": "select_slot",
+  "protocolVersion": 1,
+  "slot": 3,
+  "source": "streamdeck_key"
+}

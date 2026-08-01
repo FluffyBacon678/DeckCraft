@@ -1,0 +1,24 @@
+{
+  "type": "hotbar_state",
+  "protocolVersion": 1,
+  "sequence": 42,
+  "timestampMillis": 1730000000000,
+  "minecraftVersion": "1.21.11",
+  "modVersion": "0.1.0",
+  "inWorld": true,
+  "screenOpen": false,
+  "screenType": null,
+  "playerName": "Player",
+  "selectedSlot": 2,
+  "slots": [
+    { "slot": 0, "empty": false, "itemId": "minecraft:diamond_sword", "displayName": "Diamond Sword", "count": 1, "maxCount": 1, "damageable": true, "damage": 120, "maxDamage": 1561, "durabilityRemaining": 1441, "durabilityPercent": 92, "hasEnchantments": true },
+    { "slot": 1, "empty": false, "itemId": "minecraft:cooked_beef", "displayName": "Steak", "count": 32, "maxCount": 64, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 2, "empty": false, "itemId": "minecraft:iron_pickaxe", "displayName": "Iron Pickaxe", "count": 1, "maxCount": 1, "damageable": true, "damage": 145, "maxDamage": 250, "durabilityRemaining": 105, "durabilityPercent": 42, "hasEnchantments": false },
+    { "slot": 3, "empty": false, "itemId": "minecraft:cobblestone", "displayName": "Cobblestone", "count": 64, "maxCount": 64, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 4, "empty": true, "itemId": null, "displayName": "", "count": 0, "maxCount": 0, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 5, "empty": true, "itemId": null, "displayName": "", "count": 0, "maxCount": 0, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 6, "empty": true, "itemId": null, "displayName": "", "count": 0, "maxCount": 0, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 7, "empty": true, "itemId": null, "displayName": "", "count": 0, "maxCount": 0, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false },
+    { "slot": 8, "empty": false, "itemId": "minecraft:torch", "displayName": "Torch", "count": 16, "maxCount": 64, "damageable": false, "damage": 0, "maxDamage": 0, "durabilityRemaining": 0, "durabilityPercent": null, "hasEnchantments": false }
+  ]
+}

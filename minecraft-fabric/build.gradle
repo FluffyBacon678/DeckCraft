@@ -1,0 +1,51 @@
+plugins {
+    // Loom 1.14 is the official recommendation for Minecraft 1.21.11 (version in gradle.properties).
+    // 'fabric-loom' (the legacy id) is correct for obfuscated versions like 1.21.11; only
+    // 26.1+ requires switching to 'net.fabricmc.fabric-loom-remap'/'net.fabricmc.fabric-loom'.
+    id 'fabric-loom' version "${loom_version}"
+    id 'java'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    // Loom pulls Minecraft/Fabric automatically; add extra repos here if needed.
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    // NOTE: No third-party WebSocket dependency is needed.
+    // The mod uses the JDK built-in java.net.http.WebSocket (Java 11+; MC 1.21 runs on Java 21).
+    // Gson (com.google.gson.*) is provided transitively by Minecraft.
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+java {
+    // Minecraft 1.21+ requires Java 21.
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = 21
+    it.options.encoding = "UTF-8"
+}

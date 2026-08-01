@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Name": "DeckCraft Hotbar",
+  "Version": "0.1.0.0",
+  "Author": "FluffyBacon",
+  "Description": "Mirror your Minecraft hotbar to your Stream Deck and select hotbar slots. Client-side, localhost only.",
+  "Category": "DeckCraft Hotbar",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "Icon": "imgs/plugin/marketplace",
+  "URL": "https://github.com/FluffyBacon678/InputShowOff",
+  "SDKVersion": 2,
+  "CodePath": "bin/plugin.js",
+  "Nodejs": {
+    "Version": "20",
+    "Debug": "enabled"
+  },
+  "Software": {
+    "MinimumVersion": "6.5"
+  },
+  "OS": [
+    { "Platform": "windows", "MinimumVersion": "10" },
+    { "Platform": "mac", "MinimumVersion": "12" }
+  ],
+  "UUID": "com.fluffybacon.deckcraft-hotbar",
+  "Actions": [
+    {
+      "Name": "Hotbar Slot",
+      "UUID": "com.fluffybacon.deckcraft-hotbar.slot",
+      "Icon": "imgs/actions/slot/icon",
+      "Tooltip": "Mirrors one Minecraft hotbar slot (1-9) and selects it when pressed.",
+      "PropertyInspectorPath": "ui/slot.html",
+      "Controllers": ["Keypad"],
+      "States": [
+        {
+          "Image": "imgs/actions/slot/key",
+          "TitleAlignment": "middle",
+          "FontSize": "14"
+        }
+      ]
+    }
+  ]
+}
