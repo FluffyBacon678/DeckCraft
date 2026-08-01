@@ -3,13 +3,14 @@
   "id": "deckcraft_hotbar",
   "version": "${version}",
   "name": "DeckCraft Hotbar",
-  "description": "Mirrors your Minecraft hotbar to an Elgato Stream Deck and lets you select hotbar slots from the deck. Client-side only; not required on the server.",
+  "description": "Mirrors your own Minecraft hotbar onto an Elgato Stream Deck and lets you select a hotbar slot by pressing a key -- the same thing the 1-9 keys already do. REQUIRES the companion DeckCraft Hotbar Stream Deck plugin and Stream Deck hardware; the mod does nothing on its own. It connects only to 127.0.0.1 (your own computer) and never sends data anywhere else. It does not automate attacks, clicks, item use, or inventory movement. Client-side only and never required on the server.",
   "authors": [
     "FluffyBacon"
   ],
   "contact": {
     "homepage": "https://github.com/FluffyBacon678/InputShowOff",
-    "sources": "https://github.com/FluffyBacon678/InputShowOff"
+    "sources": "https://github.com/FluffyBacon678/InputShowOff",
+    "issues": "https://github.com/FluffyBacon678/InputShowOff/issues"
   },
   "license": "MIT",
   "icon": "assets/deckcraft_hotbar/icon.png",

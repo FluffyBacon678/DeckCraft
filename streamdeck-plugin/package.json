@@ -13,7 +13,8 @@
     "test": "node scripts/protocol-roundtrip-test.mjs",
     "fake-mc": "node scripts/fake-minecraft.mjs",
     "preview": "node scripts/preview-keys.mjs",
-    "profile": "node scripts/make-profile.mjs"
+    "profile": "node scripts/make-profile.mjs",
+    "package": "node scripts/package-plugin.mjs"
   },
   "author": "FluffyBacon",
   "license": "MIT",
