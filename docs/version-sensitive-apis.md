@@ -31,6 +31,8 @@ the checklist; fix these first if the mod doesn't compile.
 | 5 | **Item id** | `Registries.ITEM.getId(item)` | `Registries.ITEM` is `DefaultedRegistry<Item>`; `Registry#getId(T)` is `@Nullable Identifier` | `HotbarStateReader.java` |
 | 6 | **ItemStack basics** | `isEmpty / getItem / getCount / getMaxCount / isDamageable / getDamage / getMaxDamage / getName` | all present; `getName()` returns `Text` (→ `.getString()`) | `HotbarStateReader.java` |
 | 7 | **Hotbar access** | `inventory.getStack(0..8)` | `public ItemStack getStack(int)` | `HotbarStateReader.java` |
+| 10 | **Armor slot order** | `36`=boots, `37`=leggings, `38`=chestplate, `39`=helmet | Confirmed by disassembling `PlayerInventory` from the Yarn 1.21.11+build.6 jar: `EQUIPMENT_SLOTS` is built as `36 + slot.getEntitySlotId()` registering FEET, LEGS, CHEST, HEAD in that order, then OFFHAND at literal `40`. | `HotbarStateReader.java` |
+| 11 | **Slot space size** | we read `0..40` | Constants are `MAIN_SIZE=36`, `HOTBAR_SIZE=9`, `OFF_HAND_SLOT=40`, **`BODY_SLOT=41`**, **`SADDLE_SLOT=42`**. 41/42 exist because equipment is shared with mobs (body armor, saddles); they are not part of the player inventory screen and are intentionally skipped. | `HotbarStateReader.java` |
 | 8 | **Client lifecycle** | `MinecraftClient.getInstance() / .player / .world / .currentScreen / .execute / .getNetworkHandler` | stable | several |
 | 9 | **Fabric events** | `ClientModInitializer`, `ClientTickEvents.END_CLIENT_TICK`, `ClientLifecycleEvents.CLIENT_STOPPING` | stable Fabric API | `DeckCraftHotbarClient.java` |
 

@@ -25,11 +25,25 @@ public final class HotbarStateReader {
     public static final int HOTBAR_SIZE = 9;
     /** PlayerInventory.MAIN_SIZE — hotbar (0-8) + 27 storage slots (9-35). */
     public static final int MAIN_SIZE = 36;
-    /** Armor occupies 36..39. Order is feet, legs, chest, head (see readSlot notes). */
+    /**
+     * Armor occupies 36..39, in the order feet, legs, chest, head.
+     *
+     * <p>VERIFIED against the Yarn 1.21.11+build.6 Minecraft jar: PlayerInventory's static
+     * initialiser builds {@code EQUIPMENT_SLOTS} as {@code 36 + slot.getEntitySlotId()} and
+     * registers FEET, LEGS, CHEST, HEAD in that order, then OFFHAND at the literal 40. So
+     * 36=boots, 37=leggings, 38=chestplate, 39=helmet. This is not an assumption.</p>
+     */
     public static final int ARMOR_START = 36;
-    /** PlayerInventory.OFF_HAND_SLOT == 36 + 4 == 40. */
+    /** PlayerInventory.OFF_HAND_SLOT == 40. */
     public static final int OFFHAND_SLOT = 40;
-    /** Total addressable slots: 36 main + 4 armor + 1 offhand. */
+    /**
+     * We read slots 0..40 (36 main + 4 armor + offhand).
+     *
+     * <p>1.21.11's PlayerInventory also defines {@code BODY_SLOT = 41} and
+     * {@code SADDLE_SLOT = 42} — these exist because equipment handling is shared with mobs
+     * (wolf/horse body armor, saddles). They are not part of a player's inventory screen and are
+     * deliberately not mirrored.</p>
+     */
     public static final int TOTAL_SLOTS = 41;
 
     private HotbarStateReader() {
