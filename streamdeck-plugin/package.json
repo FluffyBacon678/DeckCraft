@@ -14,7 +14,9 @@
     "fake-mc": "node scripts/fake-minecraft.mjs",
     "preview": "node scripts/preview-keys.mjs",
     "profile": "node scripts/make-profile.mjs",
-    "package": "node scripts/package-plugin.mjs"
+    "package": "node scripts/package-plugin.mjs",
+    "icons:library": "powershell -ExecutionPolicy Bypass -File scripts/make-deck-icon-library.ps1",
+    "check": "node scripts/preview-keys.mjs && node scripts/render-checks.mjs"
   },
   "author": "FluffyBacon",
   "license": "MIT",

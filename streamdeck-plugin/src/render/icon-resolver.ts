@@ -22,12 +22,9 @@ const ITEMS_DIR = process.env.DECKCRAFT_ITEMS_DIR || DEFAULT_ITEMS_DIR;
 const cache = new Map<string, string | null>();
 
 /**
- * Block items often have no `textures/item/<name>.png`; their block texture is a good flat
- * stand-in, but the file is sometimes suffixed. Try a few common shapes before giving up.
+ * Files are named by item id (the extractor walks Minecraft's own model graph), so lookup is a
+ * single exact hit — no filename guessing, and no chance of matching the wrong texture.
  */
-function candidateNames(path: string): string[] {
-  return [path, `${path}_top`, `${path}_side`, `${path}_front`, `${path}_still`];
-}
 
 /**
  * Resolves the texture file basename for an item id, or undefined if this id must not use the
@@ -64,17 +61,15 @@ export function resolveIcon(itemId: string | null | undefined): string | undefin
     return undefined;
   }
 
-  for (const name of candidateNames(path)) {
-    const file = join(ITEMS_DIR, `${name}.png`);
-    try {
-      if (existsSync(file)) {
-        const uri = `data:image/png;base64,${readFileSync(file).toString("base64")}`;
-        cache.set(itemId, uri);
-        return uri;
-      }
-    } catch {
-      break; // unreadable file — fall back to the item name
+  const file = join(ITEMS_DIR, `${path}.png`);
+  try {
+    if (existsSync(file)) {
+      const uri = `data:image/png;base64,${readFileSync(file).toString("base64")}`;
+      cache.set(itemId, uri);
+      return uri;
     }
+  } catch {
+    // unreadable file — fall through to the item-name fallback
   }
 
   cache.set(itemId, null);

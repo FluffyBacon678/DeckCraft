@@ -82,13 +82,35 @@ copies them into the plugin. Nothing is downloaded, and no game assets are commi
 It auto-detects the newest installed version, or pass a path:
 `npm run icons:extract -- "C:\path\to\1.21.11.jar"`.
 
-What you get:
-- **Items** (tools, food, ingots) — their real 16×16 art.
-- **Blocks** — their block texture as a flat tile, which reads well on a key.
-- **No flat texture** (shields, spawn eggs, modded items) — falls back to the **item name**.
+This walks Minecraft's **own model graph** (`assets/minecraft/items/*.json` → model → parent
+chain → texture) rather than guessing that item `X` uses texture `X.png`, so the mapping is exact
+and near-complete:
+
+- **1487 of 1488 items resolve (99.9%)** — the one that doesn't is `air`.
+- Covers awkward cases that filename-guessing misses: shields, beds, chests, spawn eggs, potions,
+  and every block item.
+- **Modded items always fall back to the item name.** Lookup is restricted to the `minecraft:`
+  namespace so a modded `somemod:iron_ingot` can never borrow the vanilla iron ingot's art.
 - Skip this step entirely and every key just shows names. Nothing breaks.
 
 To preview exactly what your keys will look like: `npm run preview` → opens `preview-keys.html`.
+
+## Minecraft icons for your *other* Stream Deck keys
+
+```bash
+npm run icons:library
+```
+
+Produces `dist/minecraft-deck-icons/` — **1487 Minecraft item icons at 144×144**, upscaled with
+nearest-neighbour so the pixel art stays crisp, with transparency preserved. Drag any of them onto
+**any** Stream Deck key: OBS scenes, folders, website shortcuts, macros, other plugins' actions.
+Nothing about them is tied to this plugin.
+
+Options: `-Size 288` for larger, `-DarkBackground` to flatten onto the deck's dark grey instead of
+transparency. Animated textures (fire, water, portal) are cropped to their first frame.
+
+> These are Minecraft's own textures read from your local install — for your personal use. Don't
+> redistribute them. `npm run package` deliberately excludes them from the shippable plugin.
 
 ## Quick setup: import the ready-made profile
 
