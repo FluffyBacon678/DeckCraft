@@ -33,12 +33,17 @@ if (-not (Test-Path $inDir)) {
 if (Test-Path $outDir) { Remove-Item -Recurse -Force $outDir }
 New-Item -ItemType Directory -Force $outDir | Out-Null
 
-$files = Get-ChildItem -Path $inDir -Filter *.png
+# Textures are stored per namespace (items/<ns>/<id>.png), so recurse and mirror that structure
+# in the output — keeps vanilla and modded icons apart and browsable.
+$files = Get-ChildItem -Path $inDir -Filter *.png -Recurse
 $total = $files.Count
 $done = 0
 $animated = 0
 
 foreach ($f in $files) {
+    $ns = Split-Path -Leaf (Split-Path -Parent $f.FullName)
+    $nsDir = Join-Path $outDir $ns
+    if (-not (Test-Path $nsDir)) { New-Item -ItemType Directory -Force $nsDir | Out-Null }
     $src = [System.Drawing.Image]::FromFile($f.FullName)
     try {
         # Animated textures are stored as a vertical strip of frames; take the first frame only.
@@ -60,14 +65,14 @@ foreach ($f in $files) {
             $g.DrawImage($src, $destRect, 0, 0, $srcW, $frameH, [System.Drawing.GraphicsUnit]::Pixel)
         } finally { $g.Dispose() }
 
-        $bmp.Save((Join-Path $outDir $f.Name), [System.Drawing.Imaging.ImageFormat]::Png)
+        $bmp.Save((Join-Path $nsDir $f.Name), [System.Drawing.Imaging.ImageFormat]::Png)
         $bmp.Dispose()
         $done++
         if ($done % 250 -eq 0) { Write-Output "  ...$done / $total" }
     } finally { $src.Dispose() }
 }
 
-$mb = [math]::Round(((Get-ChildItem $outDir | Measure-Object -Property Length -Sum).Sum / 1MB), 1)
+$mb = [math]::Round(((Get-ChildItem $outDir -Recurse -File | Measure-Object -Property Length -Sum).Sum / 1MB), 1)
 Write-Output ""
 Write-Output "Wrote $done icons at ${Size}x${Size} to:"
 Write-Output "  $outDir"

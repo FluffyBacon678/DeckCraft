@@ -57,7 +57,10 @@ const modded = byCaption("modded ->");
 check("unknown modded item has no icon", !hasIcon(modded));
 check("unknown modded item shows its name (wrapped)", textOf(modded).includes("Fancy"));
 
-const long = byCaption("long modded name wraps");
+// A mod that IS installed should get its own art — this is the mod-compatibility guarantee.
+check("installed mod's item renders its own texture", hasIcon(byCaption("INSTALLED mod item")));
+
+const long = byCaption("long name wraps");
 check("long name wraps onto multiple lines", textNodes(long).length >= 3);
 
 // --- tags and states -------------------------------------------------------

@@ -82,16 +82,37 @@ copies them into the plugin. Nothing is downloaded, and no game assets are commi
 It auto-detects the newest installed version, or pass a path:
 `npm run icons:extract -- "C:\path\to\1.21.11.jar"`.
 
-This walks Minecraft's **own model graph** (`assets/minecraft/items/*.json` → model → parent
-chain → texture) rather than guessing that item `X` uses texture `X.png`, so the mapping is exact
-and near-complete:
+This walks the game's **own model graph** (`assets/<ns>/items/*.json` → model → parent chain →
+texture) rather than guessing that item `X` uses texture `X.png`, so the mapping is exact:
 
-- **1487 of 1488 items resolve (99.9%)** — the one that doesn't is `air`.
+- **1487 of 1488 vanilla items resolve (99.9%)** — the one that doesn't is `air`.
 - Covers awkward cases that filename-guessing misses: shields, beds, chests, spawn eggs, potions,
   and every block item.
-- **Modded items always fall back to the item name.** Lookup is restricted to the `minecraft:`
-  namespace so a modded `somemod:iron_ingot` can never borrow the vanilla iron ingot's art.
+- **Modded items work too** — see below.
 - Skip this step entirely and every key just shows names. Nothing breaks.
+
+### Mod compatibility
+
+Fabric mods ship items, models and textures in exactly the same layout as vanilla, so the same
+extractor handles them. It scans your `mods` folder automatically and resolves modded models even
+when they inherit from vanilla ones (`minecraft:item/generated`):
+
+```
+Vanilla: 1487 items
+Scanning 119 mod jars...  13 mods provided items
+  1493 minecraft · 179 farmersdelight · 85 rusticdelight · 36 friendsandfoes
+    35 travelersbackpack · 23 illagerinvasion · 10 untitledduckmod · 4 silkworms · …
+```
+
+Textures are stored per namespace (`items/<namespace>/<id>.png`), which makes the safety property
+structural rather than a rule to remember: `somemod:iron_ingot` resolves under `items/somemod/`
+and **can never be served vanilla's iron ingot**. If the mod is installed it gets its own art; if
+not, the key shows the item name.
+
+Re-run `npm run icons:extract` whenever you add or update mods. Use `--no-mods` for vanilla only.
+
+The mod itself adds no mixins and touches nothing but the local player's own inventory, so it has
+no reason to conflict with other mods.
 
 To preview exactly what your keys will look like: `npm run preview` → opens `preview-keys.html`.
 
@@ -101,10 +122,10 @@ To preview exactly what your keys will look like: `npm run preview` → opens `p
 npm run icons:library
 ```
 
-Produces `dist/minecraft-deck-icons/` — **1487 Minecraft item icons at 144×144**, upscaled with
-nearest-neighbour so the pixel art stays crisp, with transparency preserved. Drag any of them onto
-**any** Stream Deck key: OBS scenes, folders, website shortcuts, macros, other plugins' actions.
-Nothing about them is tied to this plugin.
+Produces `dist/minecraft-deck-icons/<namespace>/` — **1863 item icons at 144×144** (vanilla *and*
+your installed mods), upscaled with nearest-neighbour so the pixel art stays crisp, with
+transparency preserved. Drag any of them onto **any** Stream Deck key: OBS scenes, folders,
+website shortcuts, macros, other plugins' actions. Nothing about them is tied to this plugin.
 
 Options: `-Size 288` for larger, `-DarkBackground` to flatten onto the deck's dark grey instead of
 transparency. Animated textures (fire, water, portal) are cropped to their first frame.

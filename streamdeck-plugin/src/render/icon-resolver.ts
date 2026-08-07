@@ -27,23 +27,26 @@ const cache = new Map<string, string | null>();
  */
 
 /**
- * Resolves the texture file basename for an item id, or undefined if this id must not use the
- * bundled vanilla textures.
+ * Splits an item id into the namespaced path its texture lives at, or undefined if the id is not
+ * a shape we will look up.
  *
- * Vanilla-only by design: a modded item sharing a vanilla path (e.g. "somemod:iron_ingot") would
- * otherwise silently render the WRONG art. Exported for testing.
+ * Textures are stored per namespace (`items/<namespace>/<id>.png`), which is what makes modded
+ * items safe: "somemod:iron_ingot" resolves under `items/somemod/`, so it can never be served
+ * vanilla's iron ingot. If that mod really is installed and was scanned, it gets its own art.
+ * Exported for testing.
  */
-export function vanillaTexturePath(itemId: string | null | undefined): string | undefined {
+export function texturePathFor(itemId: string | null | undefined): string | undefined {
   if (!itemId) {
     return undefined;
   }
   const colon = itemId.indexOf(":");
   const namespace = colon >= 0 ? itemId.slice(0, colon) : "minecraft";
   const path = colon >= 0 ? itemId.slice(colon + 1) : itemId;
-  if (namespace !== "minecraft" || !/^[a-z0-9_]+$/.test(path)) {
+  // Guard against anything that could escape the items directory.
+  if (!/^[a-z0-9_.-]+$/.test(namespace) || !/^[a-z0-9_]+$/.test(path)) {
     return undefined;
   }
-  return path;
+  return `${namespace}/${path}`;
 }
 
 export function resolveIcon(itemId: string | null | undefined): string | undefined {
@@ -55,7 +58,7 @@ export function resolveIcon(itemId: string | null | undefined): string | undefin
     return cached ?? undefined;
   }
 
-  const path = vanillaTexturePath(itemId);
+  const path = texturePathFor(itemId);
   if (!path || !existsSync(ITEMS_DIR)) {
     cache.set(itemId, null);
     return undefined;

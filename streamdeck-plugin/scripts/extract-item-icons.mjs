@@ -1,8 +1,13 @@
-// Extracts a texture for (almost) every Minecraft item into
-// com.fluffybacon.deckcraft-hotbar.sdPlugin/imgs/items/<item_id>.png
+// Extracts a texture for (almost) every item into
+// com.fluffybacon.deckcraft-hotbar.sdPlugin/imgs/items/<namespace>/<item_id>.png
 //
-//   npm run icons:extract              # auto-discovers the newest jar in .minecraft
+// Covers vanilla AND every mod in your mods folder, because Fabric mods ship item definitions,
+// models and textures in exactly the same layout as vanilla. Namespacing the output folder means
+// a modded item can never be served a vanilla texture by accident.
+//
+//   npm run icons:extract              # auto-discovers the newest jar + your mods folder
 //   npm run icons:extract -- <path>    # or point it at a specific client jar
+//   npm run icons:extract -- <path> --no-mods    # vanilla only
 //
 // Rather than guessing that item "X" uses texture "X.png", this walks the game's own model
 // graph, which is what the game itself does:
@@ -119,13 +124,16 @@ function findModelRef(node, depth = 0) {
   return null;
 }
 
-/** Merge a model's textures with its inherited parent chain. */
-function resolveTextures(modelPath, getJson, depth = 0) {
+/**
+ * Merge a model's textures with its inherited parent chain. Namespace-aware, because a mod's
+ * model almost always inherits from a vanilla one (`minecraft:item/generated`).
+ */
+function resolveTextures(modelPath, source, defaultNs, depth = 0) {
   if (!modelPath || depth > 12) return {};
-  const path = stripNs(modelPath);
-  const json = getJson(`assets/minecraft/models/${path}.json`);
+  const ns = modelPath.includes(":") ? modelPath.slice(0, modelPath.indexOf(":")) : defaultNs;
+  const json = source.getJson(`assets/${ns}/models/${stripNs(modelPath)}.json`);
   if (!json) return {};
-  const parentTex = json.parent ? resolveTextures(json.parent, getJson, depth + 1) : {};
+  const parentTex = json.parent ? resolveTextures(json.parent, source, ns, depth + 1) : {};
   return { ...parentTex, ...(json.textures || {}) };
 }
 
@@ -166,8 +174,102 @@ function pickTexture(textures, itemId) {
   return null;
 }
 
+// ---- source: one jar, with a fallback chain for cross-jar references ------
+/**
+ * Mod models routinely inherit from vanilla (`minecraft:item/generated`) and occasionally
+ * reference vanilla textures, so every lookup falls back to the vanilla jar.
+ */
+function makeSource(buf, entries, fallback) {
+  const jsonCache = new Map();
+  return {
+    entries,
+    has(name) {
+      return entries.has(name) || (fallback ? fallback.has(name) : false);
+    },
+    getJson(name) {
+      if (jsonCache.has(name)) return jsonCache.get(name);
+      let parsed = null;
+      try {
+        const data = readData(buf, entries.get(name));
+        if (data) parsed = JSON.parse(data.toString("utf8"));
+      } catch {
+        parsed = null;
+      }
+      if (parsed === null && fallback) parsed = fallback.getJson(name);
+      jsonCache.set(name, parsed);
+      return parsed;
+    },
+    getBytes(name) {
+      let data = null;
+      try {
+        data = readData(buf, entries.get(name));
+      } catch {
+        data = null;
+      }
+      if ((!data || data.length === 0) && fallback) data = fallback.getBytes(name);
+      return data;
+    },
+  };
+}
+
+/** Resolve + write every item namespace found in one source. Returns per-namespace counts. */
+function extractFrom(source, stats) {
+  const ITEM_DEF = /^assets\/([a-z0-9_.-]+)\/items\/([a-z0-9_/]+)\.json$/;
+  const found = [];
+  for (const name of source.entries.keys()) {
+    const m = ITEM_DEF.exec(name);
+    if (m) found.push({ ns: m[1], id: m[2], path: name });
+  }
+
+  for (const { ns, id, path } of found) {
+    const def = source.getJson(path);
+    if (!def) {
+      stats.unresolved.push(`${ns}:${id}`);
+      continue;
+    }
+    const modelRef = findModelRef(def);
+    if (!modelRef) {
+      stats.unresolved.push(`${ns}:${id}`);
+      continue;
+    }
+
+    const modelNs = modelRef.includes(":") ? modelRef.slice(0, modelRef.indexOf(":")) : ns;
+    let texture = null;
+    const textures = resolveTextures(modelRef, source, ns);
+    if (Object.keys(textures).length) texture = pickTexture(textures, id.split("/").pop());
+
+    if (!texture) {
+      // Special renderers expose `base` as a texture path rather than a model.
+      const direct = `assets/${modelNs}/textures/${stripNs(modelRef)}.png`;
+      if (source.has(direct)) texture = modelRef;
+    }
+    if (!texture) {
+      stats.unresolved.push(`${ns}:${id}`);
+      continue;
+    }
+
+    const texNs = texture.includes(":") ? texture.slice(0, texture.indexOf(":")) : ns;
+    const png = source.getBytes(`assets/${texNs}/textures/${stripNs(texture)}.png`);
+    if (!png || png.length === 0) {
+      stats.unresolved.push(`${ns}:${id}`);
+      continue;
+    }
+
+    const dir = join(OUT_DIR, ns);
+    mkdirSync(dir, { recursive: true });
+    // Some ids are nested (a/b) — flatten to keep lookup a single exact path.
+    writeFileSync(join(dir, `${id.replace(/\//g, "_")}.png`), png);
+    stats.byNs[ns] = (stats.byNs[ns] || 0) + 1;
+    stats.written++;
+  }
+  return found.length;
+}
+
 // ---- main ----------------------------------------------------------------
-const jarPath = process.argv[2] || discoverJar();
+const args = process.argv.slice(2);
+const noMods = args.includes("--no-mods");
+const jarPath = args.find((a) => !a.startsWith("--")) || discoverJar();
+
 if (!jarPath || !existsSync(jarPath)) {
   console.error("Could not find a Minecraft client jar.");
   console.error('Pass one explicitly:  npm run icons:extract -- "<path to 1.21.11.jar>"');
@@ -175,79 +277,59 @@ if (!jarPath || !existsSync(jarPath)) {
   process.exit(1);
 }
 
-console.log(`Reading model graph from: ${jarPath}`);
-const buf = readFileSync(jarPath);
-const entries = readAllEntries(buf);
-
-const jsonCache = new Map();
-function getJson(name) {
-  if (jsonCache.has(name)) return jsonCache.get(name);
-  let parsed = null;
-  try {
-    const data = readData(buf, entries.get(name));
-    if (data) parsed = JSON.parse(data.toString("utf8"));
-  } catch {
-    parsed = null;
-  }
-  jsonCache.set(name, parsed);
-  return parsed;
-}
-
 if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true, force: true });
 mkdirSync(OUT_DIR, { recursive: true });
 
-const ITEM_DEF = /^assets\/minecraft\/items\/([a-z0-9_]+)\.json$/;
-const itemIds = [];
-for (const name of entries.keys()) {
-  const m = ITEM_DEF.exec(name);
-  if (m) itemIds.push(m[1]);
-}
-itemIds.sort();
+console.log(`Vanilla: ${jarPath}`);
+const vanillaBuf = readFileSync(jarPath);
+const vanilla = makeSource(vanillaBuf, readAllEntries(vanillaBuf), null);
 
-let written = 0;
-const unresolved = [];
+const stats = { written: 0, byNs: {}, unresolved: [] };
+const vanillaTotal = extractFrom(vanilla, stats);
+console.log(`  ${stats.byNs.minecraft || 0} / ${vanillaTotal} vanilla items resolved`);
 
-for (const id of itemIds) {
-  const def = getJson(`assets/minecraft/items/${id}.json`);
-  if (!def) {
-    unresolved.push(id);
-    continue;
+// ---- mods ----------------------------------------------------------------
+let modJars = [];
+if (!noMods && process.env.APPDATA) {
+  const modsDir = join(process.env.APPDATA, ".minecraft", "mods");
+  if (existsSync(modsDir)) {
+    modJars = readdirSync(modsDir)
+      .filter((f) => f.toLowerCase().endsWith(".jar"))
+      .map((f) => join(modsDir, f));
   }
-  const modelRef = findModelRef(def);
-  if (!modelRef) {
-    unresolved.push(id);
-    continue;
-  }
-
-  // `base` on special renderers already points at a texture, not a model.
-  let texture = null;
-  const textures = resolveTextures(modelRef, getJson);
-  if (Object.keys(textures).length) {
-    texture = pickTexture(textures, id);
-  }
-  if (!texture) {
-    // e.g. shield -> base "minecraft:item/shield": try it as a direct texture path.
-    const direct = `assets/minecraft/textures/${stripNs(modelRef)}.png`;
-    if (entries.has(direct)) texture = stripNs(modelRef);
-  }
-  if (!texture) {
-    unresolved.push(id);
-    continue;
-  }
-
-  const png = readData(buf, entries.get(`assets/minecraft/textures/${stripNs(texture)}.png`));
-  if (!png || png.length === 0) {
-    unresolved.push(id);
-    continue;
-  }
-  writeFileSync(join(OUT_DIR, `${id}.png`), png);
-  written++;
 }
 
-const pct = ((written / itemIds.length) * 100).toFixed(1);
-console.log(`Resolved ${written} of ${itemIds.length} items (${pct}%) -> ${OUT_DIR}`);
-if (unresolved.length) {
-  console.log(`${unresolved.length} items have no flat texture and will show their name instead.`);
-  console.log(`  e.g. ${unresolved.slice(0, 12).join(", ")}${unresolved.length > 12 ? " ..." : ""}`);
+if (modJars.length) {
+  console.log(`Scanning ${modJars.length} mod jars...`);
+  let withItems = 0;
+  for (const jar of modJars) {
+    try {
+      const buf = readFileSync(jar);
+      const entries = readAllEntries(buf);
+      // Cheap skip: no item definitions means nothing for us.
+      let hasItems = false;
+      for (const n of entries.keys()) {
+        if (/^assets\/[a-z0-9_.-]+\/items\/.+\.json$/.test(n)) {
+          hasItems = true;
+          break;
+        }
+      }
+      if (!hasItems) continue;
+      withItems++;
+      extractFrom(makeSource(buf, entries, vanilla), stats);
+    } catch {
+      // A malformed or exotic jar must never abort the whole extraction.
+    }
+  }
+  console.log(`  ${withItems} mods provided items`);
 }
-console.log("Textures are keyed by item id, so lookup is exact — no filename guessing.");
+
+// ---- report --------------------------------------------------------------
+const namespaces = Object.entries(stats.byNs).sort((a, b) => b[1] - a[1]);
+console.log(`\nWrote ${stats.written} textures across ${namespaces.length} namespaces -> ${OUT_DIR}`);
+for (const [ns, n] of namespaces.slice(0, 12)) console.log(`  ${String(n).padStart(5)}  ${ns}`);
+if (namespaces.length > 12) console.log(`  ...and ${namespaces.length - 12} more`);
+if (stats.unresolved.length) {
+  console.log(`\n${stats.unresolved.length} items have no usable flat texture; those keys show the item name.`);
+}
+console.log("\nLookup is <namespace>/<id>.png — exact, so a modded item can never borrow vanilla art.");
