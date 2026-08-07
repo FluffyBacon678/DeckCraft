@@ -109,7 +109,22 @@ structural rather than a rule to remember: `somemod:iron_ingot` resolves under `
 and **can never be served vanilla's iron ingot**. If the mod is installed it gets its own art; if
 not, the key shows the item name.
 
-Re-run `npm run icons:extract` whenever you add or update mods. Use `--no-mods` for vanilla only.
+### Resource packs
+
+Your **enabled** resource packs are applied too, in the same precedence order Minecraft uses
+(read from `options.txt`, later packs win), so a key shows the item as *you* see it rather than
+as vanilla draws it:
+
+```
+Applying 8 enabled resource pack(s)...
+  27 textures replaced so icons match your game:
+    VanillaTweaks (2) · Fancy Crops (11) · Better-Leaves (11) · 3D Ladders (1) · ...
+```
+
+Higher-resolution packs (Faithful 32×, etc.) work fine — keys scale whatever they find.
+
+Re-run `npm run icons:extract` whenever you add or update mods **or change resource packs**.
+Flags: `--no-mods` for vanilla only, `--no-resourcepacks` to ignore packs.
 
 The mod itself adds no mixins and touches nothing but the local player's own inventory, so it has
 no reason to conflict with other mods.

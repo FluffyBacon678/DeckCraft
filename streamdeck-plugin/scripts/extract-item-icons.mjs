@@ -258,11 +258,73 @@ function extractFrom(source, stats) {
     const dir = join(OUT_DIR, ns);
     mkdirSync(dir, { recursive: true });
     // Some ids are nested (a/b) — flatten to keep lookup a single exact path.
-    writeFileSync(join(dir, `${id.replace(/\//g, "_")}.png`), png);
+    const outFile = join(dir, `${id.replace(/\//g, "_")}.png`);
+    writeFileSync(outFile, png);
+    // Remember where this texture came from so resource packs can override it later.
+    stats.resolved.push({ outFile, assetPath: `assets/${texNs}/textures/${stripNs(texture)}.png` });
     stats.byNs[ns] = (stats.byNs[ns] || 0) + 1;
     stats.written++;
   }
   return found.length;
+}
+
+/**
+ * Reads the ACTIVE resource packs from options.txt, lowest priority first.
+ * Entries look like ["vanilla","file/Some Pack.zip","continuity:default"]; only `file/` entries
+ * are real zips on disk — the rest are built-in or supplied by mods.
+ */
+function activeResourcePacks() {
+  if (!process.env.APPDATA) return [];
+  const mcDir = join(process.env.APPDATA, ".minecraft");
+  const optionsPath = join(mcDir, "options.txt");
+  if (!existsSync(optionsPath)) return [];
+  const line = readFileSync(optionsPath, "utf8")
+    .split(/\r?\n/)
+    .find((l) => l.startsWith("resourcePacks:"));
+  if (!line) return [];
+  let list;
+  try {
+    list = JSON.parse(line.slice("resourcePacks:".length));
+  } catch {
+    return [];
+  }
+  return list
+    .filter((e) => typeof e === "string" && e.startsWith("file/"))
+    .map((e) => join(mcDir, "resourcepacks", e.slice("file/".length)))
+    .filter((p) => existsSync(p) && p.toLowerCase().endsWith(".zip"));
+}
+
+/**
+ * Overwrite any already-extracted texture that an enabled resource pack replaces, so the deck
+ * shows what the player actually sees in game. Packs are applied in options.txt order, so a
+ * later pack wins — the same precedence Minecraft uses.
+ */
+function applyResourcePacks(packs, stats) {
+  let overridden = 0;
+  const packsUsed = [];
+  for (const pack of packs) {
+    let hits = 0;
+    try {
+      const buf = readFileSync(pack);
+      const entries = readAllEntries(buf);
+      for (const { outFile, assetPath } of stats.resolved) {
+        const entry = entries.get(assetPath);
+        if (!entry) continue;
+        const png = readData(buf, entry);
+        if (!png || png.length === 0) continue;
+        writeFileSync(outFile, png);
+        hits++;
+      }
+    } catch {
+      // A pack that isn't a readable zip is simply skipped.
+      continue;
+    }
+    if (hits) {
+      overridden += hits;
+      packsUsed.push(`${pack.split(/[\\/]/).pop()} (${hits})`);
+    }
+  }
+  return { overridden, packsUsed };
 }
 
 // ---- main ----------------------------------------------------------------
@@ -284,7 +346,7 @@ console.log(`Vanilla: ${jarPath}`);
 const vanillaBuf = readFileSync(jarPath);
 const vanilla = makeSource(vanillaBuf, readAllEntries(vanillaBuf), null);
 
-const stats = { written: 0, byNs: {}, unresolved: [] };
+const stats = { written: 0, byNs: {}, unresolved: [], resolved: [] };
 const vanillaTotal = extractFrom(vanilla, stats);
 console.log(`  ${stats.byNs.minecraft || 0} / ${vanillaTotal} vanilla items resolved`);
 
@@ -322,6 +384,22 @@ if (modJars.length) {
     }
   }
   console.log(`  ${withItems} mods provided items`);
+}
+
+// ---- resource packs ------------------------------------------------------
+const noPacks = args.includes("--no-resourcepacks");
+if (!noPacks) {
+  const packs = activeResourcePacks();
+  if (packs.length) {
+    console.log(`Applying ${packs.length} enabled resource pack(s)...`);
+    const { overridden, packsUsed } = applyResourcePacks(packs, stats);
+    if (overridden) {
+      console.log(`  ${overridden} textures replaced so icons match your game:`);
+      for (const p of packsUsed) console.log(`    ${p}`);
+    } else {
+      console.log("  none of them replace item textures");
+    }
+  }
 }
 
 // ---- report --------------------------------------------------------------

@@ -31,6 +31,23 @@ Something else holds `38191` (often a second copy of the plugin, or a leftover p
 - Look for `Received select_slot` in the Minecraft log and `command_result` in the plugin log.
   A `screen_open` / `not_in_world` message means the safety rule fired.
 
+## Keys show item names instead of icons
+- Run `npm run icons:extract` once — without it every key falls back to the item's name.
+- Then rebuild/reinstall the plugin and **restart the Stream Deck app**; it caches the old files.
+- A key showing a name for a *modded* item means that mod wasn't scanned: check the jar is in
+  `.minecraft/mods`, then re-run the extractor. Some items legitimately have no flat texture
+  (about 47 in vanilla) and always show their name.
+
+## Icons don't match what I see in game
+- Re-run `npm run icons:extract` after changing resource packs — enabled packs are read from
+  `options.txt` at extraction time, not live.
+- Only *enabled* packs are applied. Packs supplied by mods (entries without a `file/` prefix,
+  e.g. `continuity:default`) are skipped.
+
+## I added a mod and its items show names
+Re-run `npm run icons:extract`, reinstall the plugin, restart Stream Deck. Extraction is a
+snapshot of your mods folder, not a live lookup.
+
 ## Fabric version mismatch / mod won't load
 - The mod requires Minecraft **1.21.11**, **Fabric Loader**, **Fabric API**, **Java 21**.
 - If it won't compile, see [version-sensitive-apis.md](version-sensitive-apis.md) — the
