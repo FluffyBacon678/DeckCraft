@@ -71,11 +71,20 @@ importable profile is included so you don't have to configure keys one by one.
 
 ## What it does not do
 
-- It does **not** automate attacks, clicks, item use, or inventory movement
-- It does **not** move items between slots — storage, armor and off-hand keys are display-only
-- It does **not** read anything beyond your own inventory: no chat, no other players, no
-  containers, no world data
-- It is **not** OCR, screen scraping, or memory reading — it is a normal Fabric client mod
+Pressing a key performs exactly one action: **select a hotbar slot**, identical to pressing
+`1`–`9` on the keyboard. Specifically, it does **not**:
+
+- automate attacks, clicks, item use, or aim — there is no combat assistance of any kind
+- modify movement, flight or speed
+- move, drop, duplicate or destroy items — storage, armor and off-hand keys are display-only
+- read anything beyond your own inventory: no chat, no other players, no containers, no world data
+- use OCR, screen scraping, or memory reading — it is a normal Fabric client mod
+
+It gives no mechanical advantage: a Stream Deck press is no faster than the vanilla number keys.
+
+**Full disclosure on the optional inventory mirror:** if you assign keys to storage, armor or
+off-hand slots, those show their contents without you opening the inventory screen. It is your
+own inventory, it is read-only, and it is off unless you configure such a key.
 
 ## Networking
 
@@ -97,6 +106,35 @@ fall back to showing the item name.
 ```
 
 ---
+
+## §3 Cheats and Hacks — the section that matters most here
+
+A mod that lets an external device control Minecraft invites this question, so it is worth
+answering directly. §3's prohibited functions, checked one by one:
+
+| Prohibited function | DeckCraft Hotbar |
+|---|---|
+| X-ray / seeing through blocks | No world data is read at all. |
+| Aim bot / aim assist | No aiming, no cursor or camera control. |
+| Flight, speed, other movement modification | No movement code whatsoever. |
+| **Automatic or assisted PvP combat** | **No.** Pressing a key selects a hotbar slot — the identical action to pressing `1`–`9`. It never attacks, uses, times or chains anything. One key press = one slot change, and only while the player physically presses it. |
+| Client-side hiding of mods with server opt-outs | Nothing is hidden; the mod is inert on servers. |
+| Item duplication | No item is created, moved, dropped or destroyed. |
+
+There is also no mechanical advantage on offer: a Stream Deck press is not faster than a keyboard
+press, so slot switching is if anything slower than the vanilla keys.
+
+### The one genuine grey area — disclose it, don't hide it
+
+With the optional full-inventory mirror enabled, storage/armor/off-hand keys show those slots
+**without the player opening the inventory screen**. That is information you already own and can
+see at any time by pressing `E`, and it is comparable to the many inventory-HUD mods on Modrinth
+— but it is the only part of this project that shows something not already on screen.
+
+It is off by default (the mod sends the hotbar only until a key asks for more), it is read-only,
+and it reveals nothing about other players, containers or the world. The listing states plainly
+what is mirrored, which is what §2's honesty requirement asks for. If a moderator ever objects,
+the fix is small: drop the extended slots and keep the hotbar.
 
 ## Rule-by-rule check
 
