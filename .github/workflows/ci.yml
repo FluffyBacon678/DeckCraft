@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+# Note on coverage: the icon pipeline and the render checks (`npm run icons:extract`,
+# `npm run check`) read a real Minecraft installation, which a CI runner does not have. Those
+# stay local-only. Everything below runs without Minecraft and is verified to work from a clean
+# clone.
+
+jobs:
+  mod:
+    name: Fabric mod
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build
+        working-directory: minecraft-fabric
+        run: chmod +x gradlew && ./gradlew build --no-daemon
+
+      - name: Assert the jar ships no Minecraft assets
+        working-directory: minecraft-fabric
+        run: |
+          jar="$(ls build/libs/deckcraft-hotbar-*.jar | grep -v sources | head -1)"
+          echo "checking $jar"
+          if unzip -l "$jar" | grep -qE "assets/minecraft/|textures/(item|block)/"; then
+            echo "::error::Minecraft assets found inside the mod jar"
+            exit 1
+          fi
+          echo "clean"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deckcraft-hotbar-jar
+          path: minecraft-fabric/build/libs/*.jar
+
+  plugin:
+    name: Stream Deck plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: streamdeck-plugin/package-lock.json
+
+      - name: Install
+        working-directory: streamdeck-plugin
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: streamdeck-plugin
+        run: npm run typecheck
+
+      - name: Protocol round-trip tests
+        working-directory: streamdeck-plugin
+        run: npm test
+
+      - name: Build, validate manifest, and pack
+        working-directory: streamdeck-plugin
+        run: npm run dist
+
+      - name: Assert the package ships no Minecraft assets
+        working-directory: streamdeck-plugin
+        run: |
+          pkg=dist/com.fluffybacon.deckcraft-hotbar.streamDeckPlugin
+          if unzip -l "$pkg" | grep -q "imgs/items/"; then
+            echo "::error::Minecraft textures found inside the .streamDeckPlugin"
+            exit 1
+          fi
+          echo "clean"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deckcraft-hotbar-streamdeck-plugin
+          path: streamdeck-plugin/dist/*.streamDeckPlugin
