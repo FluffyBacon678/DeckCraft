@@ -3,6 +3,7 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import path from "node:path";
 import url from "node:url";
+import { copyFileSync, mkdirSync, writeFileSync } from "node:fs";
 
 /**
  * Mirrors the official @elgato/cli Node template:
@@ -36,6 +37,18 @@ export default {
       name: "emit-module-package-file",
       generateBundle() {
         this.emitFile({ fileName: "package.json", source: `{ "type": "module" }`, type: "asset" });
+      },
+    },
+    {
+      // Ship the icon extractor inside the plugin so a packaged install can generate item art
+      // on first launch, with no repo checkout and no terminal. See src/icons/auto-extract.ts.
+      name: "copy-icon-extractor",
+      writeBundle() {
+        const dest = `${sdPlugin}/tools`;
+        mkdirSync(dest, { recursive: true });
+        copyFileSync("scripts/extract-item-icons.mjs", `${dest}/extract-item-icons.mjs`);
+        // tools/ needs its own ESM marker: bin/package.json does not apply to sibling folders.
+        writeFileSync(`${dest}/package.json`, `{ "type": "module" }`);
       },
     },
   ],

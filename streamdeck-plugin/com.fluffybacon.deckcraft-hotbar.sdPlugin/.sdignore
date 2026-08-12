@@ -1,0 +1,8 @@
+# Never ship Minecraft's textures. imgs/items/ is generated on the user's own machine from
+# their own installation (see tools/extract-item-icons.mjs, run automatically on first launch).
+# Redistributing these would be republishing Mojang's assets.
+imgs/items/
+
+# Runtime + build noise
+logs/
+*.map

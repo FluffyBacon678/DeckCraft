@@ -83,3 +83,12 @@ export function resolveIcon(itemId: string | null | undefined): string | undefin
 export function iconsAvailable(): boolean {
   return existsSync(ITEMS_DIR);
 }
+
+/**
+ * Drop cached lookups. Misses are cached as `null`, so this must be called after icons are
+ * generated at runtime — otherwise every key would keep showing the name it resolved to on
+ * the very first render.
+ */
+export function clearIconCache(): void {
+  cache.clear();
+}

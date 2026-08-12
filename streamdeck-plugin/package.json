@@ -14,9 +14,10 @@
     "fake-mc": "node scripts/fake-minecraft.mjs",
     "preview": "node scripts/preview-keys.mjs",
     "profile": "node scripts/make-profile.mjs",
-    "package": "node scripts/package-plugin.mjs",
     "icons:library": "powershell -ExecutionPolicy Bypass -File scripts/make-deck-icon-library.ps1",
-    "check": "node scripts/preview-keys.mjs && node scripts/render-checks.mjs"
+    "check": "node scripts/preview-keys.mjs && node scripts/render-checks.mjs",
+    "validate": "streamdeck validate com.fluffybacon.deckcraft-hotbar.sdPlugin",
+    "dist": "npm run build && npm run validate && streamdeck pack com.fluffybacon.deckcraft-hotbar.sdPlugin --output dist --force"
   },
   "author": "FluffyBacon",
   "license": "MIT",
@@ -25,6 +26,7 @@
     "ws": "^8.18.0"
   },
   "devDependencies": {
+    "@elgato/cli": "^1.8.0",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-typescript": "^12.1.1",

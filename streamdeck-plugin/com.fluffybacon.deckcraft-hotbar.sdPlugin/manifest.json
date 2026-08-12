@@ -18,8 +18,14 @@
     "MinimumVersion": "6.5"
   },
   "OS": [
-    { "Platform": "windows", "MinimumVersion": "10" },
-    { "Platform": "mac", "MinimumVersion": "12" }
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    },
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    }
   ],
   "UUID": "com.fluffybacon.deckcraft-hotbar",
   "Actions": [
@@ -29,12 +35,14 @@
       "Icon": "imgs/actions/slot/icon",
       "Tooltip": "Mirrors one Minecraft hotbar slot (1-9) and selects it when pressed.",
       "PropertyInspectorPath": "ui/slot.html",
-      "Controllers": ["Keypad"],
+      "Controllers": [
+        "Keypad"
+      ],
       "States": [
         {
           "Image": "imgs/actions/slot/key",
           "TitleAlignment": "middle",
-          "FontSize": "14"
+          "FontSize": 14
         }
       ]
     }

@@ -59,13 +59,25 @@ full-inventory mirroring, and a ready-made profile.
 
 ## Install — Stream Deck plugin
 
-1. `cd streamdeck-plugin`
-2. `npm install`
-3. `npm run icons`  (generates placeholder PNG assets — required for the plugin to load)
-4. `npm run icons:extract`  (optional but recommended — see **Item icons** below)
-5. `npm run build`
-6. Link the plugin into Stream Deck (see `streamdeck-plugin/README` / build instructions below),
-   then restart the plugin.
+**Users:** download `com.fluffybacon.deckcraft-hotbar.streamDeckPlugin` from the
+[releases page](https://github.com/FluffyBacon678/InputShowOff/releases) and **double-click it**.
+That's the whole install — no terminal, no Node.
+
+On first launch the plugin generates item icons from your own Minecraft installation in the
+background (usually under a minute). Keys show item names until it finishes, then repaint with
+real art. If Minecraft isn't installed for your user, keys simply keep showing names.
+
+**From source:**
+
+```bash
+cd streamdeck-plugin
+npm install
+npm run build                       # icons + bundle
+npx streamdeck link com.fluffybacon.deckcraft-hotbar.sdPlugin
+npx streamdeck restart com.fluffybacon.deckcraft-hotbar
+```
+
+`npm run dist` validates the manifest and produces the `.streamDeckPlugin` in `dist/`.
 
 ## Item icons
 
