@@ -56,7 +56,8 @@ Press a key and Minecraft selects that slot, exactly like pressing 1–9 on the 
 This mod does **nothing on its own**. To use it you need:
 
 1. This mod (plus Fabric API) in your `mods` folder
-2. The **DeckCraft Hotbar Stream Deck plugin** — https://github.com/FluffyBacon678/InputShowOff
+2. The **DeckCraft Hotbar Stream Deck plugin** — download the `.streamDeckPlugin` from
+   https://github.com/FluffyBacon678/InputShowOff/releases/latest and double-click it
 3. Elgato Stream Deck hardware and the Stream Deck app (6.5+)
 
 A 15-key Stream Deck fits the whole hotbar plus your off-hand and all four armor slots. An
@@ -168,3 +169,30 @@ would be a copyright problem (§4 in spirit, and Mojang's asset terms).
 
 Ship the plugin without that folder and let `npm run icons:extract` populate it on the user's own
 machine. The plugin already degrades to item names when the folder is missing, so this works.
+
+---
+
+## Where each half is hosted
+
+The project has two halves and Modrinth only hosts one of them.
+
+| Half | Host | Status |
+|---|---|---|
+| Fabric mod (`.jar`) | **Modrinth** | ← the upload you are doing |
+| Stream Deck plugin (`.streamDeckPlugin`) | **GitHub Releases** | https://github.com/FluffyBacon678/InputShowOff/releases/latest |
+
+**Modrinth does not host Stream Deck plugins** — it is a Minecraft platform. So the plugin needs a
+home elsewhere, and the GitHub release is it. That is why the Modrinth description must link to
+the release: without it a user installs the jar and nothing happens.
+
+Both are live, so nothing further is strictly required.
+
+### Optional: Elgato Marketplace
+
+The official Stream Deck plugin store (`maker.elgato.com`) is where Stream Deck owners browse for
+plugins, and is the only channel that reaches the non-Minecraft half of the audience. It needs a
+developer account and passes a review, and submission requirements should be checked directly
+before attempting it. `npm run dist` already produces the `.streamDeckPlugin` it expects, and the
+manifest passes `streamdeck validate`.
+
+Not required for the project to work — GitHub Releases is sufficient.
