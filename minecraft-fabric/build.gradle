@@ -49,3 +49,26 @@ tasks.withType(JavaCompile).configureEach {
     it.options.release = 21
     it.options.encoding = "UTF-8"
 }
+
+// ---------------------------------------------------------------------------
+// Bundle the Stream Deck plugin installer inside the mod jar, so the Modrinth
+// download is the only thing a user needs. The mod extracts it to
+// <gamedir>/deckcraft-hotbar/ on first launch and points the player at it.
+//
+// Build it first with:  cd ../streamdeck-plugin && npm run dist
+// If it is absent the jar is still valid — the mod just skips the extraction.
+// ---------------------------------------------------------------------------
+def bundledPlugin = file("../streamdeck-plugin/dist/com.fluffybacon.deckcraft-hotbar.streamDeckPlugin")
+
+processResources {
+    if (bundledPlugin.exists()) {
+        from(bundledPlugin) {
+            into "deckcraft"
+        }
+    } else {
+        doFirst {
+            logger.lifecycle("NOTE: ${bundledPlugin.name} not found — building without the bundled " +
+                    "Stream Deck installer. Run 'npm run dist' in streamdeck-plugin to include it.")
+        }
+    }
+}

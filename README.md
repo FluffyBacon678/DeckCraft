@@ -22,8 +22,8 @@ full-inventory mirroring, and a ready-made profile.
 - A **Stream Deck plugin** that hosts that bridge, shows each slot on a key, and sends
   "select slot N" back to Minecraft when you press a **hotbar** key.
 
-> **Both halves are required.** The jar alone has nothing to talk to, and the plugin alone has no
-> data. Installing the plugin is a one-time step.
+> **Both halves are required** — but they ship together: the mod jar contains the Stream Deck
+> plugin and hands it to you on first launch. See **One download, both halves** below.
 
 ## What it is NOT
 
@@ -261,3 +261,34 @@ deckcraft-hotbar/
 ## License
 
 MIT (see each subproject). You are responsible for complying with server rules.
+
+---
+
+## One download, both halves
+
+The mod jar **ships the Stream Deck plugin inside it**. On first launch it writes
+
+```
+<your .minecraft>/deckcraft-hotbar/com.fluffybacon.deckcraft-hotbar.streamDeckPlugin
+```
+
+and points you at it in the log (and in chat, once, if the plugin isn't connected).
+**Double-click that file** to install the plugin, then restart the Stream Deck app.
+
+So installing from Modrinth is: drop one jar in `mods`, launch, double-click the file it leaves you.
+
+**What it deliberately does not do:** it never writes into the Stream Deck application's own
+plugin directory. A Minecraft mod silently installing software into another application is
+surprising, would trip antivirus and security-conscious users, and Stream Deck has to be
+restarted to notice a new plugin anyway — so the "fully automatic" version wouldn't actually be
+seamless. Handing you the installer keeps you in control.
+
+Building the jar with the plugin inside requires the plugin to exist first:
+
+```bash
+cd streamdeck-plugin && npm run dist
+cd ../minecraft-fabric && ./gradlew build
+```
+
+If the plugin isn't built, the jar is still valid — it just skips the extraction and you install
+the plugin from the releases page instead.

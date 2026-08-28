@@ -56,8 +56,10 @@ Press a key and Minecraft selects that slot, exactly like pressing 1–9 on the 
 This mod does **nothing on its own**. To use it you need:
 
 1. This mod (plus Fabric API) in your `mods` folder
-2. The **DeckCraft Hotbar Stream Deck plugin** — download the `.streamDeckPlugin` from
-   https://github.com/FluffyBacon678/InputShowOff/releases/latest and double-click it
+2. The **DeckCraft Hotbar Stream Deck plugin** — this download already contains it. On first
+   launch the mod writes `deckcraft-hotbar/com.fluffybacon.deckcraft-hotbar.streamDeckPlugin`
+   into your Minecraft folder; **double-click that file** to install it, then restart the Stream
+   Deck app. (It is also on the [releases page](https://github.com/FluffyBacon678/InputShowOff/releases/latest).)
 3. Elgato Stream Deck hardware and the Stream Deck app (6.5+)
 
 A 15-key Stream Deck fits the whole hotbar plus your off-hand and all four armor slots. An

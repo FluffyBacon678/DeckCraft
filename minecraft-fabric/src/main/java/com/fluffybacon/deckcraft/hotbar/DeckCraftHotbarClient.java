@@ -5,6 +5,7 @@ import com.fluffybacon.deckcraft.hotbar.config.DeckCraftConfig;
 import com.fluffybacon.deckcraft.hotbar.hotbar.HotbarStateTracker;
 import com.fluffybacon.deckcraft.hotbar.net.DeckCraftConnectionClient;
 import com.fluffybacon.deckcraft.hotbar.net.ProtocolJson;
+import com.fluffybacon.deckcraft.hotbar.setup.StreamDeckPluginInstaller;
 import com.fluffybacon.deckcraft.hotbar.util.DeckCraftLogger;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -34,6 +35,10 @@ public final class DeckCraftHotbarClient implements ClientModInitializer {
         DeckCraftLogger.setDebug(config.debug);
         DeckCraftLogger.info("DeckCraft Hotbar " + MOD_VERSION + " initializing (client-side)...");
 
+        // Hand the player the Stream Deck plugin installer that ships inside this jar, so the
+        // Modrinth download is all they need. Never writes into the Stream Deck app itself.
+        StreamDeckPluginInstaller.extractIfNeeded();
+
         connection = new DeckCraftConnectionClient(config.host, config.port);
         tracker = new HotbarStateTracker(connection::send, MOD_VERSION, MINECRAFT_VERSION);
         commandHandler = new StreamDeckCommandHandler(
@@ -57,6 +62,7 @@ public final class DeckCraftHotbarClient implements ClientModInitializer {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             try {
                 tracker.tick(client);
+                StreamDeckPluginInstaller.maybeNotifyInGame(client, connection.isConnected());
             } catch (Throwable t) {
                 // Never let our mod crash the game loop.
                 DeckCraftLogger.warn("Error in hotbar tick (continuing).", t);
