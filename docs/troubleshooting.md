@@ -48,6 +48,40 @@ Something else holds `38191` (often a second copy of the plugin, or a leftover p
 Re-run `npm run icons:extract`, reinstall the plugin, restart Stream Deck. Extraction is a
 snapshot of your mods folder, not a live lookup.
 
+## Nothing connects, and Minecraft's own networking is broken too
+
+If the mod never connects **and** things like joining servers or building with Gradle also fail,
+the problem is below this mod: Java cannot create an NIO `Selector`. Symptom in logs:
+
+```
+java.io.IOException: Unable to establish loopback connection
+    at sun.nio.ch.PipeImpl$Initializer$LoopbackConnector.run
+```
+
+Java builds its internal pipes from a loopback socket pair and verifies the peer address. Some
+security software, VPNs and local proxies intercept loopback connections, which breaks that check.
+Everything built on Java NIO then fails — this mod's WebSocket, Netty (so Minecraft's own
+networking), and Gradle.
+
+Confirm it in one command (any JDK 21):
+
+```bash
+cat > NioProbe.java <<'EOF'
+import java.nio.channels.Selector;
+public class NioProbe { public static void main(String[] a) throws Exception {
+    Selector.open().close(); System.out.println("Selector.open() OK"); } }
+EOF
+javac NioProbe.java && java -cp . NioProbe
+```
+
+- Prints `Selector.open() OK` → Java is fine, look elsewhere.
+- Throws `Unable to establish loopback connection` → it is the machine, not this mod.
+
+Fixes, in order: reboot; then temporarily disable antivirus / VPN / proxy software and re-run the
+probe to identify the culprit; then add an exclusion for your Java executable. Note that a plain
+loopback socket can still work while `Selector.open()` fails, so "localhost works" does not rule
+this out.
+
 ## Fabric version mismatch / mod won't load
 - The mod requires Minecraft **1.21.11**, **Fabric Loader**, **Fabric API**, **Java 21**.
 - If it won't compile, see [version-sensitive-apis.md](version-sensitive-apis.md) — the
