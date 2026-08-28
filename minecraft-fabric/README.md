@@ -74,6 +74,37 @@ Valuable in its own right, and essential when Gradle cannot run: it needs a loop
 fork its daemon and some environments block that (`Unable to establish loopback connection`).
 In that situation you can still compile and test everything with `javac` directly.
 
+## If Gradle fails with "Unable to establish loopback connection"
+
+```
+java.io.IOException: Unable to establish loopback connection
+Caused by: java.net.SocketException: Invalid argument: connect
+    at sun.nio.ch.UnixDomainSockets.connect0(Native Method)
+```
+
+The JVM's `Selector.open()` builds its internal pipe from an **AF_UNIX** socket pair. Some
+packaged/containerised process environments break AF_UNIX reparse points — `bind` succeeds but
+`connect` returns `WSAEINVAL` — and the JDK has no fallback, so every Gradle build fails.
+
+It is **not** a Gradle, firewall, Winsock or Windows problem. Reboots, Winsock resets, `sfc`,
+cache wipes and switching JDKs all change nothing, and plain TCP loopback keeps working, which is
+what makes it look like Gradle.
+
+**Fix: build outside that process tree.** `build-mod.cmd` in the repo root does the build and
+prints an `===EXITCODE=n===` marker; run it through the Task Scheduler service, which spawns with
+a fresh token:
+
+```powershell
+$cmd = 'cmd /c ""H:\...\build-mod.cmd" > "H:\...\build-mod.log" 2>&1"'
+schtasks /create /tn DeckCraftBuild /tr $cmd /sc once /st 00:00 /f
+schtasks /run /tn DeckCraftBuild
+# poll build-mod.log for ===EXITCODE=
+schtasks /delete /tn DeckCraftBuild /f
+```
+
+Running `gradlew build` from an ordinary terminal normally works too — the restriction belongs to
+the launching environment, not the machine.
+
 ## Compile-check note
 If the build fails, the first suspects are the selected-slot getter/setter and the enchantment
 check — both flagged `VERSION-SENSITIVE` in the source with the exact fallback to use.

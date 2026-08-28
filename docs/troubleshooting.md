@@ -50,20 +50,16 @@ snapshot of your mods folder, not a live lookup.
 
 ## Nothing connects, and Minecraft's own networking is broken too
 
-If the mod never connects **and** things like joining servers or building with Gradle also fail,
-the problem is below this mod: Java cannot create an NIO `Selector`. Symptom in logs:
+If the mod never connects **and** unrelated Java things fail too (joining servers, Gradle), the
+problem is below this mod: Java cannot create an NIO `Selector`.
 
 ```
 java.io.IOException: Unable to establish loopback connection
-    at sun.nio.ch.PipeImpl$Initializer$LoopbackConnector.run
+Caused by: java.net.SocketException: Invalid argument: connect
+    at sun.nio.ch.UnixDomainSockets.connect0(Native Method)
 ```
 
-Java builds its internal pipes from a loopback socket pair and verifies the peer address. Some
-security software, VPNs and local proxies intercept loopback connections, which breaks that check.
-Everything built on Java NIO then fails — this mod's WebSocket, Netty (so Minecraft's own
-networking), and Gradle.
-
-Confirm it in one command (any JDK 21):
+Confirm it (any JDK 21):
 
 ```bash
 cat > NioProbe.java <<'EOF'
@@ -74,13 +70,19 @@ EOF
 javac NioProbe.java && java -cp . NioProbe
 ```
 
-- Prints `Selector.open() OK` → Java is fine, look elsewhere.
-- Throws `Unable to establish loopback connection` → it is the machine, not this mod.
+**Plain TCP loopback can still work while this fails**, so "localhost is fine" does not rule it out.
 
-Fixes, in order: reboot; then temporarily disable antivirus / VPN / proxy software and re-run the
-probe to identify the culprit; then add an exclusion for your Java executable. Note that a plain
-loopback socket can still work while `Selector.open()` fails, so "localhost works" does not rule
-this out.
+Modern JDK selectors build their internal pipe from an **AF_UNIX** socket pair. If something stops
+`connect` on those, every NIO consumer breaks at once — this mod's WebSocket, Netty (so
+Minecraft's own networking), and Gradle.
+
+The cause is usually the *process environment* rather than the machine: a container or packaged
+app whose virtualization layer breaks AF_UNIX reparse points. Running the same command from an
+ordinary terminal normally just works. Firewall rules, Winsock resets, reboots and switching JDKs
+change nothing, so don't start there.
+
+Hitting this while **building** rather than playing? See "If Gradle fails with Unable to establish
+loopback connection" in [../minecraft-fabric/README.md](../minecraft-fabric/README.md).
 
 ## Fabric version mismatch / mod won't load
 - The mod requires Minecraft **1.21.11**, **Fabric Loader**, **Fabric API**, **Java 21**.
