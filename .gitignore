@@ -30,3 +30,4 @@ dist/
 # Derived banner PNG is redundant with the committed JPEG and is regenerable
 # from branding/source via make-branding.ps1.
 branding/modrinth-banner-1920.png
+minecraft-fabric/nettest/out-installer/

@@ -43,33 +43,42 @@ public final class StreamDeckPluginInstaller {
      * Safe to call on every launch; never throws.
      */
     public static void extractIfNeeded() {
+        Path dir = FabricLoader.getInstance().getGameDir().resolve(DIR_NAME);
+        extractedPath = extractTo(dir);
+    }
+
+    /**
+     * Writes the bundled installer into {@code dir}, returning where it landed or null if the
+     * plugin is not bundled or extraction failed. Split out from {@link #extractIfNeeded()} so it
+     * can be exercised without a Minecraft runtime. Never throws.
+     */
+    static Path extractTo(Path dir) {
         try (InputStream in = StreamDeckPluginInstaller.class.getResourceAsStream(BUNDLED)) {
             if (in == null) {
                 // Built without the plugin present (e.g. a source build that skipped npm).
                 DeckCraftLogger.debug("No Stream Deck plugin bundled in this jar.");
-                return;
+                return null;
             }
 
-            Path dir = FabricLoader.getInstance().getGameDir().resolve(DIR_NAME);
             Files.createDirectories(dir);
             Path target = dir.resolve(FILE_NAME);
 
             if (Files.exists(target)) {
-                extractedPath = target;
                 DeckCraftLogger.debug("Stream Deck plugin installer already extracted: " + target);
-                return;
+                return target;
             }
 
             try (OutputStream out = Files.newOutputStream(target)) {
                 in.transferTo(out);
             }
-            extractedPath = target;
 
             DeckCraftLogger.info("Stream Deck plugin installer written to: " + target);
             DeckCraftLogger.info("Double-click that file to install the plugin, then restart the Stream Deck app.");
+            return target;
         } catch (Throwable t) {
             // Never let a packaging convenience break startup.
             DeckCraftLogger.warn("Could not extract the bundled Stream Deck plugin installer.", t);
+            return null;
         }
     }
 

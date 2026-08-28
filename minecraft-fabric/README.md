@@ -59,6 +59,21 @@ surviving malformed JSON / bad `protocolVersion` / unknown message types, and cl
 Requires `./gradlew build` first (it uses the compiled classes). The script finds a JDK 21 and the
 Gson/SLF4J jars in the Gradle cache automatically.
 
+## Test the bundled plugin installer without Minecraft
+
+```bash
+bash nettest/run-installer-test.sh
+```
+
+Stages a `.streamDeckPlugin` at `deckcraft/` on the classpath — exactly where Gradle's
+`processResources` puts the real one — and runs the real `StreamDeckPluginInstaller.extractTo`
+against a temp directory. Covers the resource path, the copy, idempotency on a second launch,
+directory creation, and graceful failure on a bad target.
+
+Valuable in its own right, and essential when Gradle cannot run: it needs a loopback socket to
+fork its daemon and some environments block that (`Unable to establish loopback connection`).
+In that situation you can still compile and test everything with `javac` directly.
+
 ## Compile-check note
 If the build fails, the first suspects are the selected-slot getter/setter and the enchantment
 check — both flagged `VERSION-SENSITIVE` in the source with the exact fallback to use.
