@@ -32,3 +32,4 @@ dist/
 branding/modrinth-banner-1920.png
 minecraft-fabric/nettest/out-installer/
 build-mod.log
+NioProbe.java
