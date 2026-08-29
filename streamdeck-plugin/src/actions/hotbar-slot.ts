@@ -10,7 +10,7 @@ import type { ConnectionManager } from "../connection/connection-manager";
 import type { HotbarStateStore } from "../state/hotbar-state-store";
 import { renderSvgDataUri, renderTitle, type RenderInput } from "../render/key-renderer";
 import { resolveIcon } from "../render/icon-resolver";
-import { isHotbarSlot, TOTAL_SLOTS } from "../types/protocol";
+import { isHotbarSlot, OFFHAND_SLOT, TOTAL_SLOTS } from "../types/protocol";
 import { logger } from "../util/logger";
 
 type SlotSettings = {
@@ -35,9 +35,13 @@ interface VisibleKey {
  * One reusable action covering every inventory slot. The user picks a slot (hotbar 1-9,
  * storage rows, armor, or off-hand) per key.
  *
- * Only hotbar keys are interactive — pressing them selects that slot, exactly like pressing
- * 1-9 in game. Storage/armor/off-hand keys are a read-only mirror: moving items between slots
- * would be inventory automation, which this mod deliberately does not do.
+ * Every key mirrors a single vanilla input and nothing more:
+ *   hotbar  -> select that slot (the 1-9 keys)
+ *   offhand -> swap off-hand (the F key)
+ *   armor / storage -> open the inventory (the E key), where the player moves their own items
+ *
+ * The mod never moves an item on the player's behalf, so nothing here does something the
+ * player could not already do with one keypress.
  */
 @action({ UUID: "com.fluffybacon.deckcraft-hotbar.slot" })
 export class HotbarSlotAction extends SingletonAction<SlotSettings> {
@@ -86,9 +90,20 @@ export class HotbarSlotAction extends SingletonAction<SlotSettings> {
     const slotIndex = toSlotIndex(ev.payload.settings);
 
     if (!isHotbarSlot(slotIndex)) {
-      // Read-only section: nothing to do. Minecraft has no "select" for storage/armor slots.
-      logger.debug(`Key for slot ${slotIndex} pressed — read-only section, ignoring.`);
-      await ev.action.showAlert();
+      // Storage/armor/off-hand have no "selected slot" concept. Rather than doing nothing, map
+      // them to the vanilla input a player would reach for next — never to moving items for them.
+      if (!this.connection.isConnected() || this.store.getStatus() !== "in_world") {
+        await ev.action.showAlert();
+        return;
+      }
+      // Off-hand -> the vanilla F key. Armor and storage -> open the inventory (vanilla E),
+      // where the player moves their own items.
+      const playerAction = slotIndex === OFFHAND_SLOT ? "swap_offhand" : "open_inventory";
+      const sent = this.connection.playerAction(playerAction);
+      logger.debug("Key for slot " + slotIndex + " -> " + playerAction + " (ok=" + sent + ").");
+      if (!sent) {
+        await ev.action.showAlert();
+      }
       return;
     }
     if (!this.connection.isConnected()) {

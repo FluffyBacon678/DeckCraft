@@ -22,7 +22,7 @@
           <option value="7">Hotbar 8</option>
           <option value="8">Hotbar 9</option>
         </optgroup>
-        <optgroup label="Storage row 1 (read-only)">
+        <optgroup label="Storage row 1 (opens inventory)">
           <option value="9">Storage 1</option>
           <option value="10">Storage 2</option>
           <option value="11">Storage 3</option>
@@ -33,7 +33,7 @@
           <option value="16">Storage 8</option>
           <option value="17">Storage 9</option>
         </optgroup>
-        <optgroup label="Storage row 2 (read-only)">
+        <optgroup label="Storage row 2 (opens inventory)">
           <option value="18">Storage 10</option>
           <option value="19">Storage 11</option>
           <option value="20">Storage 12</option>
@@ -44,7 +44,7 @@
           <option value="25">Storage 17</option>
           <option value="26">Storage 18</option>
         </optgroup>
-        <optgroup label="Storage row 3 (read-only)">
+        <optgroup label="Storage row 3 (opens inventory)">
           <option value="27">Storage 19</option>
           <option value="28">Storage 20</option>
           <option value="29">Storage 21</option>
@@ -55,13 +55,13 @@
           <option value="34">Storage 26</option>
           <option value="35">Storage 27</option>
         </optgroup>
-        <optgroup label="Armor (read-only)">
+        <optgroup label="Armor (opens inventory)">
           <option value="36">Boots</option>
           <option value="37">Leggings</option>
           <option value="38">Chestplate</option>
           <option value="39">Helmet</option>
         </optgroup>
-        <optgroup label="Off-hand (read-only)">
+        <optgroup label="Off-hand (swaps off-hand)">
           <option value="40">Off-hand</option>
         </optgroup>
       </sdpi-select>
@@ -77,8 +77,9 @@
 
     <sdpi-item label="Notes">
       <sdpi-item-value>
-        Only hotbar keys are pressable — they select that slot, like pressing 1-9 in game.
-        Storage, armor and off-hand keys are a read-only mirror; this mod never moves items.
+        Every key mirrors one vanilla input: hotbar keys select that slot (like 1-9), the off-hand key
+        swaps off-hand (like F), and armor/storage keys open your inventory (like E) so you can move
+        things yourself. This mod never moves items for you.
         Item icons need a one-time <code>npm run icons:extract</code>; anything without a flat
         texture (shields, modded items) shows its name instead.
       </sdpi-item-value>

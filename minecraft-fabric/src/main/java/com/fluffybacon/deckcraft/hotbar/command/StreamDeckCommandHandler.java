@@ -4,6 +4,10 @@ import com.fluffybacon.deckcraft.hotbar.net.ProtocolJson;
 import com.fluffybacon.deckcraft.hotbar.util.DeckCraftLogger;
 import com.google.gson.JsonObject;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
 import java.util.function.Consumer;
 
@@ -42,6 +46,7 @@ public final class StreamDeckCommandHandler {
                 requestFullState.run();
             }
             case "set_options" -> handleSetOptions(msg);
+            case "player_action" -> handlePlayerAction(msg);
             case "hello_from_streamdeck" -> DeckCraftLogger.info("Stream Deck plugin handshake received.");
             default -> DeckCraftLogger.debug("Ignoring unknown message type: " + type);
         }
@@ -123,6 +128,77 @@ public final class StreamDeckCommandHandler {
         } catch (Throwable t) {
             DeckCraftLogger.warn("Failed to set selected slot.", t);
             reply("select_slot", false, slot, "error: " + t.getMessage());
+        }
+    }
+
+
+    /**
+     * Handles {@code player_action}. Two actions, both chosen to be things vanilla already lets
+     * the player do with a single input:
+     *
+     * <ul>
+     *   <li>{@code swap_offhand} — exactly the vanilla F keybind (a SWAP_ITEM_WITH_OFFHAND
+     *       action packet). The same 1:1 mirroring of an existing input as the hotbar keys.</li>
+     *   <li>{@code open_inventory} — opens the inventory screen, like pressing E. The mod does
+     *       not touch anything inside it; the player moves their own items.</li>
+     * </ul>
+     *
+     * <p>Deliberately absent: anything that moves an item on the player's behalf. Unequipping
+     * armor without opening a screen has no vanilla single-input equivalent, so it is not here.</p>
+     */
+    private void handlePlayerAction(JsonObject msg) {
+        String action = ProtocolJson.getString(msg, "action", null);
+        if (action == null) {
+            reply("player_action", false, null, "missing_action");
+            return;
+        }
+        if (!"swap_offhand".equals(action) && !"open_inventory".equals(action)) {
+            DeckCraftLogger.warn("Rejected player_action: unknown action " + action);
+            reply("player_action", false, null, "unknown_action");
+            return;
+        }
+
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null) {
+            reply("player_action", false, null, "client_unavailable");
+            return;
+        }
+        client.execute(() -> applyPlayerAction(client, action));
+    }
+
+    /** Runs on the Minecraft client thread. */
+    private void applyPlayerAction(MinecraftClient client, String action) {
+        if (client.player == null || client.world == null) {
+            reply("player_action", false, null, "not_in_world");
+            return;
+        }
+        if (client.currentScreen != null) {
+            // Same rule as select_slot: never act while chat/inventory/pause is open.
+            reply("player_action", false, null, "screen_open");
+            return;
+        }
+
+        try {
+            if ("swap_offhand".equals(action)) {
+                if (client.getNetworkHandler() == null) {
+                    reply("player_action", false, null, "no_network_handler");
+                    return;
+                }
+                // Byte-for-byte what vanilla sends when you press F.
+                client.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(
+                        PlayerActionC2SPacket.Action.SWAP_ITEM_WITH_OFFHAND,
+                        BlockPos.ORIGIN,
+                        Direction.DOWN));
+                DeckCraftLogger.debug("Swapped off-hand.");
+                reply("player_action", true, null, "swap_offhand");
+            } else {
+                client.setScreen(new InventoryScreen(client.player));
+                DeckCraftLogger.debug("Opened the inventory screen.");
+                reply("player_action", true, null, "open_inventory");
+            }
+        } catch (Throwable t) {
+            DeckCraftLogger.warn("player_action failed.", t);
+            reply("player_action", false, null, "error: " + t.getMessage());
         }
     }
 

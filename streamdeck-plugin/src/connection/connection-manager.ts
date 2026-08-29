@@ -206,6 +206,15 @@ export class ConnectionManager extends EventEmitter {
     return true;
   }
 
+  /** Sends a vanilla-equivalent player action. Returns true if it was sent. */
+  playerAction(action: 'swap_offhand' | 'open_inventory'): boolean {
+    if (!this.isConnected()) {
+      return false;
+    }
+    this.send({ type: 'player_action', protocolVersion: PROTOCOL_VERSION, action, source: 'streamdeck_key' });
+    return true;
+  }
+
   requestFullState(): void {
     this.send({ type: "request_full_state", protocolVersion: PROTOCOL_VERSION });
   }

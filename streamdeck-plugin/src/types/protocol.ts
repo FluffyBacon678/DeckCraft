@@ -105,6 +105,15 @@ export interface SelectSlotCommand {
   source: string;
 }
 
+/** Mirrors a single vanilla input. Never moves items on the player's behalf. */
+export interface PlayerActionCommand {
+  type: 'player_action';
+  protocolVersion: number;
+  /** swap_offhand = the vanilla F key; open_inventory = the vanilla E key. */
+  action: 'swap_offhand' | 'open_inventory';
+  source: string;
+}
+
 export interface RequestFullState {
   type: "request_full_state";
   protocolVersion: number;
@@ -123,4 +132,9 @@ export type IncomingMessage =
   | HelloFromMinecraft
   | CommandResult;
 
-export type OutgoingMessage = HelloFromStreamDeck | SelectSlotCommand | RequestFullState | SetOptions;
+export type OutgoingMessage =
+  | HelloFromStreamDeck
+  | SelectSlotCommand
+  | PlayerActionCommand
+  | RequestFullState
+  | SetOptions;

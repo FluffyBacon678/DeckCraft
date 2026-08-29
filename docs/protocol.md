@@ -119,6 +119,22 @@ Sent on key press. Slot is `0..8`.
 ```
 Rules: invalid slots rejected; only honoured in a world with no screen open.
 
+### `player_action`
+Sent when a non-hotbar key is pressed. Every action mirrors **one vanilla input**.
+```json
+{ "type": "player_action", "protocolVersion": 1, "action": "swap_offhand", "source": "streamdeck_key" }
+```
+| `action` | Vanilla equivalent | Sent by |
+|---|---|---|
+| `swap_offhand` | the **F** key (a `SWAP_ITEM_WITH_OFFHAND` action packet) | the off-hand key |
+| `open_inventory` | the **E** key (opens `InventoryScreen`) | armor and storage keys |
+
+Same gates as `select_slot`: rejected unless in a world with no screen open. Unknown actions are
+rejected with `unknown_action`.
+
+There is deliberately **no action that moves an item**. Unequipping armor without opening a
+screen has no vanilla single-input equivalent, so it is not offered.
+
 ### `request_full_state`
 Ask Minecraft to resend the current snapshot. The plugin sends this right after connect.
 ```json

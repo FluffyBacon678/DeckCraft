@@ -74,12 +74,19 @@ importable profile is included so you don't have to configure keys one by one.
 
 ## What it does not do
 
-Pressing a key performs exactly one action: **select a hotbar slot**, identical to pressing
-`1`–`9` on the keyboard. Specifically, it does **not**:
+Every key mirrors exactly one thing you can already do with a single keypress:
+
+| Key | Does | Same as |
+|---|---|---|
+| Hotbar 1-9 | selects that slot | pressing `1`-`9` |
+| Off-hand | swaps your off-hand | pressing `F` |
+| Armor / storage | opens your inventory | pressing `E` |
+
+Nothing is automated and nothing is moved for you. Specifically, it does **not**:
 
 - automate attacks, clicks, item use, or aim — there is no combat assistance of any kind
 - modify movement, flight or speed
-- move, drop, duplicate or destroy items — storage, armor and off-hand keys are display-only
+- move, drop, duplicate or destroy items — the mod never moves an item for you
 - read anything beyond your own inventory: no chat, no other players, no containers, no world data
 - use OCR, screen scraping, or memory reading — it is a normal Fabric client mod
 
@@ -87,7 +94,8 @@ It gives no mechanical advantage: a Stream Deck press is no faster than the vani
 
 **Full disclosure on the optional inventory mirror:** if you assign keys to storage, armor or
 off-hand slots, those show their contents without you opening the inventory screen. It is your
-own inventory, it is read-only, and it is off unless you configure such a key.
+own inventory, you cannot move anything from the deck, and it is off unless you configure such
+a key. Armor cannot be unequipped from the deck — that key just opens your inventory.
 
 ## Networking
 
