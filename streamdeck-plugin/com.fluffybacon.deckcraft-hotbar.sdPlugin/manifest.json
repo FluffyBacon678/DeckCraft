@@ -7,7 +7,7 @@
   "Category": "DeckCraft Hotbar",
   "CategoryIcon": "imgs/plugin/category-icon",
   "Icon": "imgs/plugin/marketplace",
-  "URL": "https://github.com/FluffyBacon678/InputShowOff",
+  "URL": "https://github.com/FluffyBacon678/DeckCraft",
   "SDKVersion": 2,
   "CodePath": "bin/plugin.js",
   "Nodejs": {

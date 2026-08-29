@@ -60,7 +60,7 @@ full-inventory mirroring, and a ready-made profile.
 ## Install — Stream Deck plugin
 
 **Users:** download `com.fluffybacon.deckcraft-hotbar.streamDeckPlugin` from the
-[releases page](https://github.com/FluffyBacon678/InputShowOff/releases) and **double-click it**.
+[releases page](https://github.com/FluffyBacon678/DeckCraft/releases) and **double-click it**.
 That's the whole install — no terminal, no Node.
 
 On first launch the plugin generates item icons from your own Minecraft installation in the
@@ -174,7 +174,7 @@ Produces `dist/DeckCraft Hotbar.streamDeckProfile` — **double-click it to impo
 ```
 row 1:  H1  H2  H3  H4  H5
 row 2:  H6  H7  H8  H9  Off-hand
-row 3:  S1  S2  S3  S4  S5      ← first 5 backpack slots (read-only)
+row 3:  S1  S2  S3  S4  S5      ← first 5 backpack slots (press = open inventory)
 ```
 
 A Stream Deck profile is bound to a **device model**. This one targets the 15-key

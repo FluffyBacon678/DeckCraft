@@ -30,8 +30,8 @@ Set on the **version**, in Version Settings:
 | **Categories** | Utility, Management |
 | **Loaders** | Fabric |
 | **Game version** | 1.21.11 |
-| **Source** | https://github.com/FluffyBacon678/InputShowOff |
-| **Issues** | https://github.com/FluffyBacon678/InputShowOff/issues |
+| **Source** | https://github.com/FluffyBacon678/DeckCraft |
+| **Issues** | https://github.com/FluffyBacon678/DeckCraft/issues |
 
 ### Summary (paste as-is)
 
@@ -59,7 +59,7 @@ This mod does **nothing on its own**. To use it you need:
 2. The **DeckCraft Hotbar Stream Deck plugin** — this download already contains it. On first
    launch the mod writes `deckcraft-hotbar/com.fluffybacon.deckcraft-hotbar.streamDeckPlugin`
    into your Minecraft folder; **double-click that file** to install it, then restart the Stream
-   Deck app. (It is also on the [releases page](https://github.com/FluffyBacon678/InputShowOff/releases/latest).)
+   Deck app. (It is also on the [releases page](https://github.com/FluffyBacon678/DeckCraft/releases/latest).)
 3. Elgato Stream Deck hardware and the Stream Deck app (6.5+)
 
 A 15-key Stream Deck fits the whole hotbar plus your off-hand and all four armor slots. An
@@ -189,7 +189,7 @@ The project has two halves and Modrinth only hosts one of them.
 | Half | Host | Status |
 |---|---|---|
 | Fabric mod (`.jar`) | **Modrinth** | ← the upload you are doing |
-| Stream Deck plugin (`.streamDeckPlugin`) | **GitHub Releases** | https://github.com/FluffyBacon678/InputShowOff/releases/latest |
+| Stream Deck plugin (`.streamDeckPlugin`) | **GitHub Releases** | https://github.com/FluffyBacon678/DeckCraft/releases/latest |
 
 **Modrinth does not host Stream Deck plugins** — it is a Minecraft platform. So the plugin needs a
 home elsewhere, and the GitHub release is it. That is why the Modrinth description must link to
